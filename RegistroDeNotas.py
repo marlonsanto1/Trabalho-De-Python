@@ -158,7 +158,6 @@ def consultar_dados():
     ctk.set_default_color_theme("blue")
 
     # Adicione aqui os widgets para consulta de dados
-    # Exemplo de layout para consulta de dados
     frame_consulta = ctk.CTkFrame(consulta_root, corner_radius=10, border_width=2, border_color="lightblue")
     frame_consulta.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
@@ -166,7 +165,6 @@ def consultar_dados():
     label_consulta.grid(row=0, column=0, columnspan=2, pady=10)
 
     # Adicione os campos e widgets necessários aqui
-
     button_voltar = ctk.CTkButton(consulta_root, text="Voltar", command=lambda: voltar(consulta_root))
     button_voltar.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
 
@@ -176,34 +174,14 @@ def consultar_dados():
 def inserir_dados():
     inserir_root = ctk.CTk()
     inserir_root.title("Inserir Dados")
-    inserir_root.geometry("800x470")
+    inserir_root.geometry("1100x470")
     inserir_root.resizable(False, False)
     ctk.set_appearance_mode("light")
     ctk.set_default_color_theme("blue")
 
-    # Frame para inclusão de alunos
-    frame_aluno = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
-    frame_aluno.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-
-    label_titulo_aluno = ctk.CTkLabel(frame_aluno, text="Incluir Aluno", font=("Arial", 16))
-    label_titulo_aluno.grid(row=0, column=0, columnspan=2, pady=10)
-
-    label_nome_aluno = ctk.CTkLabel(frame_aluno, text="Nome do Aluno:")
-    label_nome_aluno.grid(row=1, column=0, padx=10, pady=5)
-    entry_nome_aluno = ctk.CTkEntry(frame_aluno, width=200)
-    entry_nome_aluno.grid(row=1, column=1, padx=10, pady=5)
-
-    label_matricula = ctk.CTkLabel(frame_aluno, text="Número de Matrícula:")
-    label_matricula.grid(row=2, column=0, padx=10, pady=5)
-    entry_matricula = ctk.CTkEntry(frame_aluno, width=200)
-    entry_matricula.grid(row=2, column=1, padx=10, pady=5)
-
-    button_incluir_aluno = ctk.CTkButton(frame_aluno, text="Incluir Aluno", command=incluir_aluno)
-    button_incluir_aluno.grid(row=3, column=0, columnspan=2, pady=10)
-
     # Frame para inclusão de disciplinas
     frame_disciplina = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
-    frame_disciplina.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
+    frame_disciplina.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
     label_titulo_disciplina = ctk.CTkLabel(frame_disciplina, text="Incluir Disciplina", font=("Arial", 16))
     label_titulo_disciplina.grid(row=0, column=0, columnspan=2, pady=10)
@@ -226,9 +204,31 @@ def inserir_dados():
     button_incluir_disciplina = ctk.CTkButton(frame_disciplina, text="Incluir Disciplina", command=incluir_disciplina)
     button_incluir_disciplina.grid(row=4, column=0, columnspan=2, pady=10)
 
+
+
+    # Frame para inclusão de alunos
+    frame_aluno = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
+    frame_aluno.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+
+    label_titulo_aluno = ctk.CTkLabel(frame_aluno, text="Incluir Aluno", font=("Arial", 16))
+    label_titulo_aluno.grid(row=0, column=0, columnspan=2, pady=10)
+
+    label_nome_aluno = ctk.CTkLabel(frame_aluno, text="Nome do Aluno:")
+    label_nome_aluno.grid(row=1, column=0, padx=10, pady=5)
+    entry_nome_aluno = ctk.CTkEntry(frame_aluno, width=200)
+    entry_nome_aluno.grid(row=1, column=1, padx=10, pady=5)
+
+    label_matricula = ctk.CTkLabel(frame_aluno, text="Número de Matrícula:")
+    label_matricula.grid(row=2, column=0, padx=10, pady=5)
+    entry_matricula = ctk.CTkEntry(frame_aluno, width=200)
+    entry_matricula.grid(row=2, column=1, padx=10, pady=5)
+
+    button_incluir_aluno = ctk.CTkButton(frame_aluno, text="Incluir Aluno", command=incluir_aluno)
+    button_incluir_aluno.grid(row=3, column=0, columnspan=2, pady=10)
+
     # Frame para inserir notas
     frame_notas = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
-    frame_notas.grid(row=0, column=1, rowspan=2, padx=20, pady=20, sticky="nsew")
+    frame_notas.grid(row=0, column=2, rowspan=2, padx=10, pady=10, sticky="nsew")
 
     label_titulo_notas = ctk.CTkLabel(frame_notas, text="Inserir Notas", font=("Arial", 16))
     label_titulo_notas.grid(row=0, column=0, columnspan=2, pady=10)
@@ -262,7 +262,7 @@ def inserir_dados():
     button_incluir_notas.grid(row=6, column=0, columnspan=2, pady=10)
     
     button_voltar = ctk.CTkButton(inserir_root, text="Voltar", command=lambda: voltar(inserir_root))
-    button_voltar.grid(row=1, column=1, padx=50, pady=15, sticky="ew")
+    button_voltar.grid(row=4, column=1, columnspan=1, pady=10, padx=10, sticky="ew")
 
     inserir_root.mainloop()
 
