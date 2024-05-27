@@ -17,6 +17,7 @@ def connect_db():
     )
 
     cursor = conn.cursor()
+ #Criação da tabela de Alunos   
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS alunos (
         id SERIAL PRIMARY KEY,
@@ -25,6 +26,7 @@ def connect_db():
     )
     ''')
 
+#Criação da tabela de disciplinas
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS disciplinas (
         id SERIAL PRIMARY KEY,
@@ -34,6 +36,7 @@ def connect_db():
     )
     ''')
 
+#Criação da tabela responsavel por amazenar as notas e o calculo da nota final do aluno 
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS notas (
         id SERIAL PRIMARY KEY,
@@ -47,7 +50,7 @@ def connect_db():
         situacao VARCHAR(20)
     )
     ''')
-
+#Criação da tabela para vincular as tabelas de alunos e disciplinas
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS aluno_disciplina (
         id SERIAL PRIMARY KEY,
