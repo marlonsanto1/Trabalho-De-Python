@@ -252,13 +252,13 @@ def inserir_dados():
         return resultados
 
     def inscrever_aluno():
-        idAluno = entry_id_inscricao_aluno.get()
-        idDisciplina = entry_id_inscricao_disciplina.get()
+        idAluno = int(entry_id_aluno.get())
+        idDisciplina = int(entry_id_disciplina.get())
 
         print("ID Aluno:", idAluno)
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO aluno_disciplina (id_aluno, id_disciplina) VALUES (%i, %i)", (idAluno, idDisciplina))
+        cursor.execute("INSERT INTO aluno_disciplina (id_aluno, id_disciplina) VALUES (%s, %s)", (idAluno, idDisciplina))
         conn.commit()
         cursor.close()
         conn.close()
@@ -301,8 +301,8 @@ def inserir_dados():
         sm2 = entry_sm2.get() if entry_sm2.get() else 0
         av = entry_av.get() if entry_av.get() else 0
         avs = entry_avs.get() if entry_avs.get() else 0
-        id_aluno = entry_id_aluno.get()
-        id_disciplina = entry_id_disciplina.get()
+        id_aluno = entry_id_inscricao_aluno.get() 
+        id_disciplina = entry_id_inscricao_disciplina.get()
 
         conn = connect_db()
         cursor = conn.cursor()
@@ -390,11 +390,6 @@ def inserir_dados():
     entry_matricula = ctk.CTkEntry(frame_aluno, width=200)
     entry_matricula.grid(row=2, column=1, padx=10, pady=5)
 
-    label_matricula = ctk.CTkLabel(frame_aluno, text="Número de Matrícula:")
-    label_matricula.grid(row=2, column=0, padx=10, pady=5)
-    entry_matricula = ctk.CTkEntry(frame_aluno, width=200)
-    entry_matricula.grid(row=2, column=1, padx=10, pady=5)
-
     button_incluir_aluno = ctk.CTkButton(frame_aluno, text="Incluir Aluno", command=incluir_aluno)
     button_incluir_aluno.grid(row=3, column=0, columnspan=2, pady=10)
 
@@ -402,12 +397,12 @@ def inserir_dados():
     label_inscricao.grid(row=5, column=0, columnspan=2, pady=10)
 
     label_id_aluno = ctk.CTkLabel(frame_aluno, text="ID do Aluno:")
-    label_id_aluno.grid(row=6, column=0, pady=5, sticky="e")
+    label_id_aluno.grid(row=6, column=0, pady=5)
     entry_id_aluno = ctk.CTkEntry(frame_aluno)
     entry_id_aluno.grid(row=6, column=1, pady=5)
 
     label_id_disciplina = ctk.CTkLabel(frame_aluno, text="ID da Disciplina:")
-    label_id_disciplina.grid(row=7, column=0, pady=5, sticky="e")
+    label_id_disciplina.grid(row=7, column=0, pady=5)
     entry_id_disciplina = ctk.CTkEntry(frame_aluno)
     entry_id_disciplina.grid(row=7, column=1, pady=5)
 
