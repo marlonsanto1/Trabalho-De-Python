@@ -35,10 +35,10 @@ def connect_db():
     ''')
 
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS inscricoes (
+    CREATE TABLE IF NOT EXISTS notas (
         id SERIAL PRIMARY KEY,
-        aluno_id INTEGER NOT NULL REFERENCES alunos(id),
-        disciplina_id INTEGER NOT NULL REFERENCES disciplinas(id),
+        id_aluno INTEGER NOT NULL REFERENCES alunos(id),
+        id_disciplina INTEGER NOT NULL REFERENCES disciplinas(id),
         sm1 REAL,
         sm2 REAL,
         av REAL,
@@ -48,7 +48,16 @@ def connect_db():
     )
     ''')
 
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS aluno_disciplina (
+        id SERIAL PRIMARY KEY,
+        id_aluno INTEGER NOT NULL REFERENCES alunos(id),
+        id_disciplina INTEGER NOT NULL REFERENCES disciplinas(id)
+    )
+    ''')
     conn.commit()
+
+    return conn
     
 # Função para incluir disciplin
 # Função para calcular notas finais
@@ -95,33 +104,10 @@ def consultar_dados():
         else:
             messagebox.showinfo("Consulta de Inscrições", "Nenhuma inscrição encontrada.")
 
-    # Função para consultar disciplinas
-    def consultar_disciplinas():
-        conn = connect_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id_disciplina, nome, ano, semestre FROM disciplina")
-        resultados = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        if resultados:
-            relatorio = "\n".join([f"ID: {id_disciplina}, Nome: {nome}, Ano: {ano}, Semestre: {semestre}" for id_disciplina, nome, ano, semestre in resultados])
-            messagebox.showinfo("Consulta de Disciplinas", relatorio)
-        else:
-            messagebox.showinfo("Consulta de Disciplinas", "Nenhuma disciplina encontrada.")
+    
 
     # Função para consultar alunos
-    def consultar_alunos():
-        conn = connect_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id_aluno, nome, numero_matricula FROM aluno")
-        resultados = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        if resultados:
-            relatorio = "\n".join([f"ID: {id_aluno}, Nome: {nome}, Matrícula: {matricula}" for id_aluno, nome, matricula in resultados])
-            messagebox.showinfo("Consulta de Alunos", relatorio)
-        else:
-            messagebox.showinfo("Consulta de Alunos", "Nenhum aluno encontrado.")
+    
 
     # Função para calcular a nota final e atualizar a situação
     def calcular_nf():
@@ -190,12 +176,6 @@ def consultar_dados():
     label_consulta = ctk.CTkLabel(frame_consulta, text="Consultar Dados", font=("Arial", 16))
     label_consulta.grid(row=0, column=0, columnspan=2, pady=10)
 
-    button_consultar_alunos = ctk.CTkButton(frame_consulta, text="Consultar Alunos", command=consultar_alunos)
-    button_consultar_alunos.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
-
-    button_consultar_disciplinas = ctk.CTkButton(frame_consulta, text="Consultar Disciplinas", command=consultar_disciplinas)
-    button_consultar_disciplinas.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
-
     button_consultar_inscricoes = ctk.CTkButton(frame_consulta, text="Consultar Inscrições", command=consultar_inscricoes)
     button_consultar_inscricoes.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
 
@@ -240,24 +220,63 @@ def consultar_dados():
 def inserir_dados():
     inserir_root = ctk.CTk()
     inserir_root.title("Inserir Dados")
-    inserir_root.geometry("1100x470")
+    inserir_root.geometry("1100x770")
     inserir_root.resizable(False, False)
     ctk.set_appearance_mode("light")
     ctk.set_default_color_theme("blue")
 
+    def criar_tabela(frame, dados):
+            for i, linha in enumerate(dados):
+                for j, valor in enumerate(linha):
+                    label = ctk.CTkLabel(frame, text=valor)
+                    label.grid(row=i+1, column=j, padx=5, pady=5, sticky="nsew")
 
+    def consultar_alunos():
+            conn = connect_db()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, nome, matricula FROM alunos")
+            resultados = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            print(resultados)
+            return resultados
     
+    # Função para consultar disciplinas
+    def consultar_disciplinas():
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, nome, ano, semestre FROM disciplinas")
+        resultados = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return resultados
+
+    def inscrever_aluno():
+        idAluno = entry_id_inscricao_aluno.get()
+        idDisciplina = entry_id_inscricao_disciplina.get()
+
+        print("ID Aluno:", idAluno)
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO aluno_disciplina (id_aluno, id_disciplina) VALUES (%i, %i)", (idAluno, idDisciplina))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        messagebox.showinfo("Sucesso", "Aluno inscrito com sucesso!")
+
+
+
     def incluir_disciplina():
         nome = entry_nome_disciplina.get()
         ano = entry_ano.get()
         semestre = entry_semestre.get()
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO disciplina (nome, ano, semestre) VALUES (%s, %s, %s)", (nome, ano, semestre))
+        cursor.execute("INSERT INTO disciplinas (nome, ano, semestre) VALUES (%s, %s, %s)", (nome, ano, semestre))
         conn.commit()
         cursor.close()
         conn.close()
-        messagebox.showinfo("Sucesso", "Disciplina incluída com sucesso!")
+        CriarFrameConsultaDisciplina()
         entry_nome_disciplina.delete(0, ctk.END)
         entry_ano.delete(0, ctk.END)
         entry_semestre.delete(0, ctk.END)
@@ -268,32 +287,35 @@ def inserir_dados():
         matricula = entry_matricula.get()
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO aluno (nome, numero_matricula) VALUES (%s, %s)", (nome, matricula))
+        cursor.execute("INSERT INTO alunos (nome, matricula) VALUES (%s, %s)", (nome, matricula))
         conn.commit()
         cursor.close()
         conn.close()
-        messagebox.showinfo("Sucesso", "Aluno incluído com sucesso!")
+        CriarFrameConsultaAluno()
         entry_nome_aluno.delete(0, ctk.END)
         entry_matricula.delete(0, ctk.END)
         
     # Função para incluir notas
     def incluir_notas():
-        inscricao_id = entry_id_inscricao.get()
-        sm1 = entry_sm1.get()
-        sm2 = entry_sm2.get()
-        av = entry_av.get()
-        avs = entry_avs.get()
+        sm1 = entry_sm1.get() if entry_sm1.get() else 0
+        sm2 = entry_sm2.get() if entry_sm2.get() else 0
+        av = entry_av.get() if entry_av.get() else 0
+        avs = entry_avs.get() if entry_avs.get() else 0
+        id_aluno = entry_id_aluno.get()
+        id_disciplina = entry_id_disciplina.get()
+
         conn = connect_db()
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE inscricao SET sm1 = %s, sm2 = %s, av = %s, avs = %s WHERE id_inscricao = %s",
-            (sm1, sm2, av, avs, inscricao_id)
+            "INSERT INTO notas (id_aluno, id_disciplina, sm1, sm2, av, avs) VALUES (%s, %s, %s, %s, %s, %s)",
+            (id_aluno, id_disciplina, sm1, sm2, av, avs)
         )
         conn.commit()
         cursor.close()
         conn.close()
         messagebox.showinfo("Sucesso", "Notas incluídas com sucesso!")
-        entry_id_inscricao.delete(0, ctk.END)
+        entry_id_aluno.delete(0, ctk.END)
+        entry_id_disciplina.delete(0, ctk.END)
         entry_sm1.delete(0, ctk.END)
         entry_sm2.delete(0, ctk.END)
         entry_av.delete(0, ctk.END)
@@ -323,6 +345,34 @@ def inserir_dados():
     button_incluir_disciplina = ctk.CTkButton(frame_disciplina, text="Incluir Disciplina", command=incluir_disciplina)
     button_incluir_disciplina.grid(row=4, column=0, columnspan=2, pady=10)
     
+
+    
+    def CriarFrameConsultaDisciplina():
+        # Frame para consulta de Disciplina
+        frame_consulta_disciplina = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
+        frame_consulta_disciplina.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+
+        label_consulta_titulo_aluno = ctk.CTkLabel(frame_consulta_disciplina, text="Consultar Disciplina", font=("Arial", 16))
+        label_consulta_titulo_aluno.grid(row=0, column=0, columnspan=2, pady=10)
+
+        result = consultar_disciplinas()
+        criar_tabela(frame_consulta_disciplina, result)
+
+    CriarFrameConsultaDisciplina()
+
+    # Frame para consulta de Disciplina
+    def CriarFrameConsultaAluno():
+        frame_consulta_aluno = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
+        frame_consulta_aluno.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+
+        label_consulta_titulo_discuplina = ctk.CTkLabel(frame_consulta_aluno, text="Consultar Aluno", font=("Arial", 16))
+        label_consulta_titulo_discuplina.grid(row=0, column=0, columnspan=2, pady=10)
+
+        result = consultar_alunos()
+        criar_tabela(frame_consulta_aluno, result)
+
+    CriarFrameConsultaAluno()
+    
     # Frame para inclusão de alunos
     frame_aluno = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
     frame_aluno.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
@@ -340,10 +390,29 @@ def inserir_dados():
     entry_matricula = ctk.CTkEntry(frame_aluno, width=200)
     entry_matricula.grid(row=2, column=1, padx=10, pady=5)
 
+    label_matricula = ctk.CTkLabel(frame_aluno, text="Número de Matrícula:")
+    label_matricula.grid(row=2, column=0, padx=10, pady=5)
+    entry_matricula = ctk.CTkEntry(frame_aluno, width=200)
+    entry_matricula.grid(row=2, column=1, padx=10, pady=5)
+
     button_incluir_aluno = ctk.CTkButton(frame_aluno, text="Incluir Aluno", command=incluir_aluno)
     button_incluir_aluno.grid(row=3, column=0, columnspan=2, pady=10)
 
-    
+    label_inscricao = ctk.CTkLabel(frame_aluno, text="Inscrever Aluno em Disciplina", font=("Arial", 16))
+    label_inscricao.grid(row=5, column=0, columnspan=2, pady=10)
+
+    label_id_aluno = ctk.CTkLabel(frame_aluno, text="ID do Aluno:")
+    label_id_aluno.grid(row=6, column=0, pady=5, sticky="e")
+    entry_id_aluno = ctk.CTkEntry(frame_aluno)
+    entry_id_aluno.grid(row=6, column=1, pady=5)
+
+    label_id_disciplina = ctk.CTkLabel(frame_aluno, text="ID da Disciplina:")
+    label_id_disciplina.grid(row=7, column=0, pady=5, sticky="e")
+    entry_id_disciplina = ctk.CTkEntry(frame_aluno)
+    entry_id_disciplina.grid(row=7, column=1, pady=5)
+
+    button_inscrever_aluno = ctk.CTkButton(frame_aluno, text="Inscrever", command=inscrever_aluno)
+    button_inscrever_aluno.grid(row=8, column=0, columnspan=2, pady=10)
     
     # Frame para inserir notas
     frame_notas = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
@@ -352,56 +421,41 @@ def inserir_dados():
     label_titulo_notas = ctk.CTkLabel(frame_notas, text="Inserir Notas", font=("Arial", 16))
     label_titulo_notas.grid(row=0, column=0, columnspan=2, pady=10)
 
-    label_id_inscricao = ctk.CTkLabel(frame_notas, text="ID da Inscrição:")
+    label_id_inscricao = ctk.CTkLabel(frame_notas, text="ID do aluno:")
     label_id_inscricao.grid(row=1, column=0, padx=10, pady=5)
-    entry_id_inscricao = ctk.CTkEntry(frame_notas, width=200)
-    entry_id_inscricao.grid(row=1, column=1, padx=10, pady=5)
+    entry_id_inscricao_aluno = ctk.CTkEntry(frame_notas, width=200)
+    entry_id_inscricao_aluno.grid(row=1, column=1, padx=10, pady=5)
+
+    label_id_inscricao = ctk.CTkLabel(frame_notas, text="ID do disciplina:")
+    label_id_inscricao.grid(row=2, column=0, padx=10, pady=5)
+    entry_id_inscricao_disciplina = ctk.CTkEntry(frame_notas, width=200)
+    entry_id_inscricao_disciplina.grid(row=2, column=1, padx=10, pady=5)
 
     label_sm1 = ctk.CTkLabel(frame_notas, text="Nota SM1:")
-    label_sm1.grid(row=2, column=0, padx=10, pady=5)
+    label_sm1.grid(row=3, column=0, padx=10, pady=5)
     entry_sm1 = ctk.CTkEntry(frame_notas, width=200)
-    entry_sm1.grid(row=2, column=1, padx=10, pady=5)
+    entry_sm1.grid(row=3, column=1, padx=10, pady=5)
 
     label_sm2 = ctk.CTkLabel(frame_notas, text="Nota SM2:")
-    label_sm2.grid(row=3, column=0, padx=10, pady=5)
+    label_sm2.grid(row=4, column=0, padx=10, pady=5)
     entry_sm2 = ctk.CTkEntry(frame_notas, width=200)
-    entry_sm2.grid(row=3, column=1, padx=10, pady=5)
+    entry_sm2.grid(row=4, column=1, padx=10, pady=5)
 
     label_av = ctk.CTkLabel(frame_notas, text="Nota AV:")
-    label_av.grid(row=4, column=0, padx=10, pady=5)
+    label_av.grid(row=5, column=0, padx=10, pady=5)
     entry_av = ctk.CTkEntry(frame_notas, width=200)
-    entry_av.grid(row=4, column=1, padx=10, pady=5)
+    entry_av.grid(row=5, column=1, padx=10, pady=5)
 
     label_avs = ctk.CTkLabel(frame_notas, text="Nota AVS:")
-    label_avs.grid(row=5, column=0, padx=10, pady=5)
+    label_avs.grid(row=6, column=0, padx=10, pady=5)
     entry_avs = ctk.CTkEntry(frame_notas, width=200)
-    entry_avs.grid(row=5, column=1, padx=10, pady=5)
+    entry_avs.grid(row=6, column=1, padx=10, pady=5)
 
     button_incluir_notas = ctk.CTkButton(frame_notas, text="Incluir Notas", command=incluir_notas)
-    button_incluir_notas.grid(row=6, column=0, columnspan=2, pady=10)
+    button_incluir_notas.grid(row=7, column=0, columnspan=2, pady=10)
     
-    '''
-    # Frame para inscrição de alunos em disciplinas
-    frame_inscricao = ctk.CTkFrame(inserir_root, corner_radius=10, border_width=2, border_color="lightblue")
-    frame_inscricao.grid(row=1, column=1, padx=20, pady=20, sticky="nsew")
+    
 
-    label_inscricao = ctk.CTkLabel(frame_inscricao, text="Inscrever Aluno em Disciplina", font=("Arial", 16))
-    label_inscricao.grid(row=0, column=0, columnspan=2, pady=10)
-
-    label_id_aluno = ctk.CTkLabel(frame_inscricao, text="ID do Aluno:")
-    label_id_aluno.grid(row=1, column=0, pady=5, sticky="e")
-    entry_id_aluno = ctk.CTkEntry(frame_inscricao)
-    entry_id_aluno.grid(row=1, column=1, pady=5)
-
-    label_id_disciplina = ctk.CTkLabel(frame_inscricao, text="ID da Disciplina:")
-    label_id_disciplina.grid(row=2, column=0, pady=5, sticky="e")
-    entry_id_disciplina = ctk.CTkEntry(frame_inscricao)
-    entry_id_disciplina.grid(row=2, column=1, pady=5)
-
-    button_inscrever_aluno = ctk.CTkButton(frame_inscricao, text="Inscrever", command=inscrever_aluno)
-    button_inscrever_aluno.grid(row=3, column=0, columnspan=2, pady=10)
-
-    '''
     #############    BOTAO De Consulta #########################
     button_voltar = ctk.CTkButton(inserir_root, text="Consultar", command=lambda: voltar(inserir_root))
     button_voltar.grid(row=4, column=0, columnspan=1, pady=10, padx=10, sticky="ew")
